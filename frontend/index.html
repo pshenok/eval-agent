@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Agent Registry - AI Evaluation Platform</title>
+    <meta name="description" content="Manage, evaluate, and orchestrate AI agents in a unified dark interface" />
+    
+    <!-- Preload fonts for better performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+      /* Prevent FOUC and set dark theme immediately */
+      html {
+        background-color: #09090f;
+        color-scheme: dark;
+      }
+      
+      body {
+        margin: 0;
+        background-color: #09090f;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      
+      /* Loading spinner */
+      .loading-spinner {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: #09090f;
+      }
+      
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 2px solid #ffffff10;
+        border-top: 2px solid #a855f7;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <!-- Fallback loading state -->
+      <div class="loading-spinner">
+        <div class="spinner"></div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
