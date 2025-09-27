@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
-import { UserModule } from './user/user.module';
+import { AgentModule } from './agent/agent.module';
+import { StageModule } from './stage/stage.module';
 
 @Module({
-    imports: [UserModule],
-    exports: [UserModule],
+    imports: [AgentModule, StageModule],
+    exports: [AgentModule, StageModule],
 })
 export class DomainModule {}

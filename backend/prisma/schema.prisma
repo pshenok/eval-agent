@@ -7,12 +7,32 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        String   @id @default(uuid())
-  fullName  String   @map("full_name")
-  email     String   @unique
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+model Agent {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  icon        String?
+  stages      Stage[]
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
-  @@map("users")
+  @@map("agents")
+}
+
+model Stage {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  sequence    Int
+  input       String
+  output      String
+  evaluation  Json?
+  vendor      String
+  type        String
+  agentId     String   @map("agent_id")
+  agent       Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("stages")
 }

@@ -11,43 +11,43 @@ import {
     HttpStatus 
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
-import { UserService } from '../../domain/user/user.service';
-import { CreateUserDto, UpdateUserDto, UserResponseDto } from './user.dto';
+import { AgentService } from '../../domain/agent/agent.service';
+import { CreateAgentDto, UpdateAgentDto, AgentResponseDto } from './agent.dto';
 
-@ApiTags('Users')
-@Controller('users')
-export class UserController {
-    constructor(private readonly userService: UserService) {}
+@ApiTags('Agents')
+@Controller('agents')
+export class AgentController {
+    constructor(private readonly agentService: AgentService) {}
 
     @Post()
     @HttpCode(HttpStatus.CREATED)
-    @ApiOperation({ summary: 'Create a new user' })
+    @ApiOperation({ summary: 'Create a new agent' })
     @ApiResponse({ 
         status: HttpStatus.CREATED, 
-        description: 'User created successfully',
-        type: UserResponseDto 
+        description: 'Agent created successfully',
+        type: AgentResponseDto 
     })
     @ApiResponse({ 
         status: HttpStatus.CONFLICT, 
-        description: 'Email already exists' 
+        description: 'Agent name already exists' 
     })
-    async create(@Body() dto: CreateUserDto): Promise<UserResponseDto> {
-        return this.userService.create(dto);
+    async create(@Body() dto: CreateAgentDto): Promise<AgentResponseDto> {
+        return this.agentService.create(dto);
     }
 
     @Get()
-    @ApiOperation({ summary: 'Get all users' })
+    @ApiOperation({ summary: 'Get all agents' })
     @ApiQuery({ name: 'skip', required: false, type: Number, description: 'Number of records to skip' })
     @ApiQuery({ name: 'take', required: false, type: Number, description: 'Number of records to take' })
     @ApiResponse({ 
         status: HttpStatus.OK, 
-        description: 'Users retrieved successfully',
+        description: 'Agents retrieved successfully',
         schema: {
             type: 'object',
             properties: {
                 items: {
                     type: 'array',
-                    items: { $ref: '#/components/schemas/UserResponseDto' }
+                    items: { $ref: '#/components/schemas/AgentResponseDto' }
                 },
                 meta: {
                     type: 'object',
@@ -66,7 +66,7 @@ export class UserController {
         @Query('skip') skip?: string,
         @Query('take') take?: string,
     ) {
-        const result = await this.userService.findAll({
+        const result = await this.agentService.findAll({
             skip: skip ? parseInt(skip, 10) : 0,
             take: take ? parseInt(take, 10) : 10,
         });
@@ -84,70 +84,70 @@ export class UserController {
     }
 
     @Get('stats')
-    @ApiOperation({ summary: 'Get users statistics' })
+    @ApiOperation({ summary: 'Get agents statistics' })
     @ApiResponse({ 
         status: HttpStatus.OK, 
         description: 'Statistics retrieved successfully',
         schema: {
             type: 'object',
             properties: {
-                totalUsers: { type: 'number' }
+                totalAgents: { type: 'number' }
             }
         }
     })
     async getStats() {
-        return this.userService.getStats();
+        return this.agentService.getStats();
     }
 
     @Get(':id')
-    @ApiOperation({ summary: 'Get user by ID' })
+    @ApiOperation({ summary: 'Get agent by ID' })
     @ApiResponse({ 
         status: HttpStatus.OK, 
-        description: 'User retrieved successfully',
-        type: UserResponseDto 
+        description: 'Agent retrieved successfully',
+        type: AgentResponseDto 
     })
     @ApiResponse({ 
         status: HttpStatus.NOT_FOUND, 
-        description: 'User not found' 
+        description: 'Agent not found' 
     })
-    async findOne(@Param('id') id: string): Promise<UserResponseDto> {
-        return this.userService.findById(id);
+    async findOne(@Param('id') id: string): Promise<AgentResponseDto> {
+        return this.agentService.findById(id);
     }
 
     @Put(':id')
-    @ApiOperation({ summary: 'Update user' })
+    @ApiOperation({ summary: 'Update agent' })
     @ApiResponse({ 
         status: HttpStatus.OK, 
-        description: 'User updated successfully',
-        type: UserResponseDto 
+        description: 'Agent updated successfully',
+        type: AgentResponseDto 
     })
     @ApiResponse({ 
         status: HttpStatus.NOT_FOUND, 
-        description: 'User not found' 
+        description: 'Agent not found' 
     })
     @ApiResponse({ 
         status: HttpStatus.CONFLICT, 
-        description: 'Email already exists' 
+        description: 'Agent name already exists' 
     })
     async update(
         @Param('id') id: string,
-        @Body() dto: UpdateUserDto,
-    ): Promise<UserResponseDto> {
-        return this.userService.update(id, dto);
+        @Body() dto: UpdateAgentDto,
+    ): Promise<AgentResponseDto> {
+        return this.agentService.update(id, dto);
     }
 
     @Delete(':id')
     @HttpCode(HttpStatus.NO_CONTENT)
-    @ApiOperation({ summary: 'Delete user' })
+    @ApiOperation({ summary: 'Delete agent' })
     @ApiResponse({ 
         status: HttpStatus.NO_CONTENT, 
-        description: 'User deleted successfully' 
+        description: 'Agent deleted successfully' 
     })
     @ApiResponse({ 
         status: HttpStatus.NOT_FOUND, 
-        description: 'User not found' 
+        description: 'Agent not found' 
     })
     async delete(@Param('id') id: string): Promise<void> {
-        await this.userService.delete(id);
+        await this.agentService.delete(id);
     }
 }

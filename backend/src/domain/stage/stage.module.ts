@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { UserService } from './user.service';
+import { StageService } from './stage.service';
 import { RepositoryModule } from '../../infra/database/repository.module';
 
 @Module({
     imports: [RepositoryModule],
-    providers: [UserService],
-    exports: [UserService],
+    providers: [StageService],
+    exports: [StageService],
 })
-export class UserModule {}
+export class StageModule {}
