@@ -5,6 +5,7 @@ import { setup as setupSwagger } from './core/swagger/swagger.setup';
 import { Logger } from './core/logger/custom.logger.service';
 import { HttpExceptionFilter } from './core/filters/http-exception.filter';
 import { Config } from './core/config/config';
+require('dotenv').config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

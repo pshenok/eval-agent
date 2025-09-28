@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, IsArray, ValidateNested } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsArray, ValidateNested, IsUUID } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
@@ -166,4 +166,66 @@ export class AgentResponseDto {
         description: 'Last update timestamp' 
     })
     updatedAt: Date;
+}
+
+export class OptimizeAgentsDto {
+    @ApiProperty({ 
+        example: ['123e4567-e89b-12d3-a456-426614174000', '456e7890-e89b-12d3-a456-426614174001'],
+        description: 'Array of agent IDs to optimize',
+        type: [String]
+    })
+    @IsArray()
+    @IsUUID(4, { each: true })
+    @IsNotEmpty({ each: true })
+    agentIds: string[];
+
+    @ApiProperty({ 
+        example: 'Optimized Multi-Agent Pipeline',
+        description: 'Name for the optimized agent',
+        required: false
+    })
+    @IsString()
+    @IsOptional()
+    optimizedAgentName?: string;
+
+    @ApiProperty({ 
+        example: 'An optimized agent created by combining multiple agents',
+        description: 'Description for the optimized agent',
+        required: false
+    })
+    @IsString()
+    @IsOptional()
+    optimizedAgentDescription?: string;
+}
+
+export class OptimizeAgentsResponseDto {
+    @ApiProperty({ 
+        example: '789e0123-e89b-12d3-a456-426614174002',
+        description: 'ID of the newly created optimized agent'
+    })
+    optimizedAgentId: string;
+
+    @ApiProperty({ 
+        example: 'Optimized Multi-Agent Pipeline',
+        description: 'Name of the optimized agent'
+    })
+    optimizedAgentName: string;
+
+    @ApiProperty({ 
+        example: 5,
+        description: 'Number of stages in the optimized agent'
+    })
+    stagesCount: number;
+
+    @ApiProperty({ 
+        example: ['123e4567-e89b-12d3-a456-426614174000', '456e7890-e89b-12d3-a456-426614174001'],
+        description: 'Original agent IDs that were optimized'
+    })
+    sourceAgentIds: string[];
+
+    @ApiProperty({ 
+        example: 'Successfully optimized agents and created new pipeline with improved stage sequencing and reduced redundancy.',
+        description: 'Optimization summary from Claude'
+    })
+    optimizationSummary: string;
 }

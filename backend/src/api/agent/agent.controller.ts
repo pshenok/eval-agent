@@ -12,7 +12,13 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { AgentService } from '../../domain/agent/agent.service';
-import { CreateAgentDto, UpdateAgentDto, AgentResponseDto } from './agent.dto';
+import { 
+    CreateAgentDto, 
+    UpdateAgentDto, 
+    AgentResponseDto, 
+    OptimizeAgentsDto, 
+    OptimizeAgentsResponseDto 
+} from './agent.dto';
 
 @ApiTags('Agents')
 @Controller('agents')
@@ -33,6 +39,29 @@ export class AgentController {
     })
     async create(@Body() dto: CreateAgentDto): Promise<AgentResponseDto> {
         return this.agentService.create(dto);
+    }
+
+    @Post('optimize')
+    @HttpCode(HttpStatus.CREATED)
+    @ApiOperation({ 
+        summary: 'Optimize multiple agents into a single efficient agent using Claude AI',
+        description: 'Takes multiple agent IDs, analyzes their stages, and creates an optimized agent using Claude AI'
+    })
+    @ApiResponse({ 
+        status: HttpStatus.CREATED, 
+        description: 'Agents optimized successfully and new agent created',
+        type: OptimizeAgentsResponseDto 
+    })
+    @ApiResponse({ 
+        status: HttpStatus.BAD_REQUEST, 
+        description: 'Invalid input or optimization failed' 
+    })
+    @ApiResponse({ 
+        status: HttpStatus.NOT_FOUND, 
+        description: 'One or more agents not found' 
+    })
+    async optimizeAgents(@Body() dto: OptimizeAgentsDto): Promise<OptimizeAgentsResponseDto> {
+        return this.agentService.optimizeAgents(dto);
     }
 
     @Get()
