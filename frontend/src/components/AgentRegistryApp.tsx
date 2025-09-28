@@ -109,7 +109,7 @@ const AgentRegistryApp: React.FC = () => {
                 <Bot className="w-5 h-5 text-white" />
               </div>
               <span className="text-lg md:text-xl font-bold text-white tracking-tight">
-                Agent Registry
+                Agent Optimizer
               </span>
             </div>
             <div className="hidden sm:flex gap-2 ml-4">
@@ -162,7 +162,7 @@ const AgentRegistryApp: React.FC = () => {
               <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white mb-2">
                 AI Agent{' '}
                 <span className="bg-gradient-to-r from-violet-300 via-fuchsia-300 to-emerald-300 bg-clip-text text-transparent">
-                  Evaluation Registry
+                  Evaluation Optimizer
                 </span>
               </h2>
               <p className="text-slate-300/90 max-w-2xl mb-5">
@@ -325,8 +325,8 @@ const AgentRegistryApp: React.FC = () => {
             {filteredAgents.length === 0 && (
               <div className={cn('p-12 rounded-3xl text-center', 'glass')}>
                 <Search className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">Ничего не найдено</h3>
-                <p className="text-slate-400">Измените поисковый запрос или попробуйте позже.</p>
+                <h3 className="text-xl font-semibold text-white mb-2"></h3>
+                <p className="text-slate-400"></p>
               </div>
             )}
           </section>
