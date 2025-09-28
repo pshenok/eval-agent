@@ -77,3 +77,7 @@ export const useDeleteAgent = () => {
     },
   });
 };
+
+// Re-export the optimization hook for convenience
+export { useOptimizeAgents } from './useOptimizeAgents';
+

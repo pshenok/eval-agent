@@ -6,6 +6,8 @@ import type {
   UpdateAgentDto,
   CreateStageDto,
   UpdateStageDto,
+  OptimizeAgentsDto,
+  OptimizeAgentsResponse,
   PaginatedResponse,
   AgentStats,
   StageStats,
@@ -14,7 +16,7 @@ import type {
 // Create axios instance
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
-  timeout: 10000,
+  timeout: 30000, // Увеличиваем timeout для оптимизации
   headers: {
     'Content-Type': 'application/json',
   },
@@ -83,6 +85,12 @@ export const agentApi = {
   // Get agent statistics
   getStats: async (): Promise<AgentStats> => {
     const response = await api.get('/agents/stats');
+    return response.data;
+  },
+
+  // Optimize agents
+  optimizeAgents: async (data: OptimizeAgentsDto): Promise<OptimizeAgentsResponse> => {
+    const response = await api.post('/agents/optimize', data);
     return response.data;
   },
 };

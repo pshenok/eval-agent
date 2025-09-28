@@ -25,6 +25,21 @@ export interface UpdateAgentDto {
   icon?: string;
 }
 
+// Optimize types
+export interface OptimizeAgentsDto {
+  agentIds: string[];
+  optimizedAgentName?: string;
+  optimizedAgentDescription?: string;
+}
+
+export interface OptimizeAgentsResponse {
+  optimizedAgentId: string;
+  optimizedAgentName: string;
+  stagesCount: number;
+  sourceAgentIds: string[];
+  optimizationSummary: string;
+}
+
 // Stage types
 export interface Stage extends BaseEntity {
   name: string;

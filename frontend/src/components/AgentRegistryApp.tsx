@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronRight,
   ChevronDown,
@@ -15,10 +15,13 @@ import {
   Bot,
   Sparkles,
   CheckCircle,
+  Combine,
+  Check,
 } from 'lucide-react';
 
 import { useAgents, useAgentStats } from '@hooks/useAgents';
 import { useStagesByAgent } from '@hooks/useStages';
+import { useOptimizeAgents } from '@hooks/useOptimizeAgents';
 import { cn, getAgentIcon, formatDate, sleep } from '@utils/index';
 import type { Agent } from '@types/index';
 
@@ -28,16 +31,21 @@ import NavButton from './ui/NavButton';
 import StageCard from './stage/StageCard';
 import LoadingSpinner from './ui/LoadingSpinner';
 import ErrorMessage from './ui/ErrorMessage';
+import OptimizationAnimation from './ui/OptimizationAnimation';
 
 const AgentRegistryApp: React.FC = () => {
   const [expandedAgent, setExpandedAgent] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [animatingStages, setAnimatingStages] = useState<string[]>([]);
   const [currentView, setCurrentView] = useState('registry');
+  const [selectedAgents, setSelectedAgents] = useState<string[]>([]);
+  const [showOptimizationAnimation, setShowOptimizationAnimation] = useState(false);
+  const [optimizingAgentNames, setOptimizingAgentNames] = useState<string[]>([]);
 
   // Queries
-  const { data: agentsData, isLoading: agentsLoading, error: agentsError } = useAgents();
+  const { data: agentsData, isLoading: agentsLoading, error: agentsError, refetch } = useAgents();
   const { data: statsData } = useAgentStats();
+  const optimizeMutation = useOptimizeAgents();
   
   // Получаем stages только для раскрытого агента
   const { data: expandedAgentStages, isLoading: stagesLoading } = useStagesByAgent(
@@ -64,9 +72,6 @@ const AgentRegistryApp: React.FC = () => {
     
     setExpandedAgent(agentId);
     setAnimatingStages([]);
-
-    // Ждем пока загрузятся stages для этого агента
-    // Анимация будет запущена после получения данных
   };
 
   // Анимируем stages когда они загружены
@@ -83,6 +88,52 @@ const AgentRegistryApp: React.FC = () => {
     }
   }, [expandedAgentStages, expandedAgent, stagesLoading]);
 
+  // Handle agent selection for optimization
+  const handleAgentSelect = (agentId: string) => {
+    setSelectedAgents(prev => {
+      if (prev.includes(agentId)) {
+        return prev.filter(id => id !== agentId);
+      } else if (prev.length < 2) {
+        return [...prev, agentId];
+      }
+      return prev;
+    });
+  };
+
+  // Handle optimization by button click
+  const handleOptimizeClick = async () => {
+    if (selectedAgents.length !== 2) return;
+
+    // Get agent names for animation
+    const agentNames = selectedAgents
+      .map(id => agents.find(agent => agent.id === id)?.name)
+      .filter(Boolean) as string[];
+    
+    setOptimizingAgentNames(agentNames);
+    setShowOptimizationAnimation(true);
+
+    try {
+      const result = await optimizeMutation.mutateAsync({
+        agentIds: selectedAgents,
+        optimizedAgentName: `Optimized ${agentNames.join(' + ')}`,
+        optimizedAgentDescription: `Optimized agent combining the best of ${agentNames.join(' and ')}`
+      });
+      console.log('Optimization result:', result);
+    } catch (error) {
+      console.error('Optimization failed:', error);
+      // Even if optimization fails, we'll still show the animation and reload
+    }
+  };
+
+  // Handle animation completion
+  const handleAnimationComplete = () => {
+    setShowOptimizationAnimation(false);
+    setOptimizingAgentNames([]);
+    setSelectedAgents([]); // Clear selection
+    // Reload the page to show new optimized agent
+    window.location.reload();
+  };
+
   const isLoading = agentsLoading;
 
   if (isLoading) {
@@ -90,7 +141,7 @@ const AgentRegistryApp: React.FC = () => {
   }
 
   if (agentsError) {
-    return <ErrorMessage error={agentsError} />;
+    return <ErrorMessage error={agentsError} onRetry={() => refetch()} />;
   }
 
   // Подсчитываем общее количество stages из всех агентов
@@ -99,6 +150,15 @@ const AgentRegistryApp: React.FC = () => {
   return (
     <div className="min-h-screen text-slate-200 bg-[#09090f] selection:bg-fuchsia-500/30 selection:text-fuchsia-50">
       <BackgroundFX />
+
+      {/* Optimization Animation */}
+      <AnimatePresence>
+        <OptimizationAnimation
+          isVisible={showOptimizationAnimation}
+          agentNames={optimizingAgentNames}
+          onComplete={handleAnimationComplete}
+        />
+      </AnimatePresence>
 
       {/* Top Navigation */}
       <nav className={cn('sticky top-0 z-20 px-6 py-4 backdrop-saturate-150', 'glass')}>
@@ -109,16 +169,16 @@ const AgentRegistryApp: React.FC = () => {
                 <Bot className="w-5 h-5 text-white" />
               </div>
               <span className="text-lg md:text-xl font-bold text-white tracking-tight">
-                Agent Optimizer
+                ReAgent
               </span>
             </div>
             <div className="hidden sm:flex gap-2 ml-4">
-              <NavButton
+              {/* <NavButton
                 icon={Users}
                 label="Registry"
                 active={currentView === 'registry'}
                 onClick={() => setCurrentView('registry')}
-              />
+              /> */}
               <NavButton
                 icon={Activity}
                 label="Analytics"
@@ -129,6 +189,32 @@ const AgentRegistryApp: React.FC = () => {
           </div>
           
           <div className="flex items-center gap-3">
+            {/* Optimize Button */}
+            {selectedAgents.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex items-center gap-2"
+              >
+                <div className={cn('px-3 py-2 rounded-xl text-sm', 'glass')}>
+                  <span className="text-slate-400">Selected:</span>
+                  <span className="text-white font-semibold ml-1">{selectedAgents.length}/2</span>
+                </div>
+                {selectedAgents.length === 2 && (
+                  <motion.button
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="btn-primary"
+                    onClick={handleOptimizeClick}
+                    disabled={optimizeMutation.isLoading}
+                  >
+                    <Combine className="w-4 h-4" />
+                    {optimizeMutation.isLoading ? 'Optimizing...' : 'Optimize'}
+                  </motion.button>
+                )}
+              </motion.div>
+            )}
+
             <div className="relative">
               <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-300/60" />
               <input
@@ -162,11 +248,11 @@ const AgentRegistryApp: React.FC = () => {
               <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white mb-2">
                 AI Agent{' '}
                 <span className="bg-gradient-to-r from-violet-300 via-fuchsia-300 to-emerald-300 bg-clip-text text-transparent">
-                  Evaluation Optimizer
+                  Evaluation
                 </span>
               </h2>
               <p className="text-slate-300/90 max-w-2xl mb-5">
-                Manage, evaluate, and orchestrate AI agents
+                Manage, evaluate, and optimize AI agents. Select 2 agents and click "Optimize" to create an improved agent.
               </p>
               <div className="flex flex-wrap items-center gap-3 text-sm">
                 <div className="flex items-center gap-2 text-violet-300">
@@ -185,10 +271,10 @@ const AgentRegistryApp: React.FC = () => {
             </div>
           </section>
 
-          {/* Agent Registry */}
           <section className="space-y-6">
             {filteredAgents.map((agent: Agent) => {
               const isExpanded = expandedAgent === agent.id;
+              const isSelected = selectedAgents.includes(agent.id);
               const agentStages = isExpanded ? (expandedAgentStages || []) : [];
 
               return (
@@ -201,17 +287,37 @@ const AgentRegistryApp: React.FC = () => {
                   className={cn(
                     'rounded-3xl overflow-hidden transition-all duration-500 hover:scale-[1.005] ring-1',
                     'glass',
-                    isExpanded ? 'ring-violet-500/30' : 'ring-white/5'
+                    isExpanded ? 'ring-violet-500/30' : 'ring-white/5',
+                    isSelected ? 'ring-emerald-500/50 bg-emerald-500/5' : ''
                   )}
                 >
                   {/* Agent Header */}
-                  <button
-                    className="w-full text-left p-6"
-                    onClick={() => handleAgentExpand(agent.id)}
-                    aria-expanded={isExpanded}
-                  >
+                  <div className="p-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4 flex-1">
+                        {/* Selection Checkbox */}
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => handleAgentSelect(agent.id)}
+                          className={cn(
+                            'w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-200',
+                            isSelected
+                              ? 'bg-emerald-500 border-emerald-500 shadow-[0_0_20px_rgba(34,197,94,0.4)]'
+                              : 'border-white/20 hover:border-emerald-400/50'
+                          )}
+                        >
+                          {isSelected && (
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                            >
+                              <Check className="w-3 h-3 text-white" />
+                            </motion.div>
+                          )}
+                        </motion.button>
+
                         <div className="text-4xl" aria-hidden>
                           {agent.icon || getAgentIcon(agent.name)}
                         </div>
@@ -252,16 +358,19 @@ const AgentRegistryApp: React.FC = () => {
                           <Play className="w-4 h-4" />
                           Run Pipeline
                         </button>
-                        <div className={cn('p-3 rounded-xl grid place-items-center', 'glass')}>
+                        <button
+                          onClick={() => handleAgentExpand(agent.id)}
+                          className={cn('p-3 rounded-xl grid place-items-center', 'glass')}
+                        >
                           {isExpanded ? (
                             <ChevronDown className="w-5 h-5 text-slate-300" />
                           ) : (
                             <ChevronRight className="w-5 h-5 text-slate-300" />
                           )}
-                        </div>
+                        </button>
                       </div>
                     </div>
-                  </button>
+                  </div>
 
                   {/* Expanded Stages */}
                   {isExpanded && (
@@ -325,8 +434,8 @@ const AgentRegistryApp: React.FC = () => {
             {filteredAgents.length === 0 && (
               <div className={cn('p-12 rounded-3xl text-center', 'glass')}>
                 <Search className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2"></h3>
-                <p className="text-slate-400"></p>
+                <h3 className="text-xl font-semibold text-white mb-2">No results found</h3>
+                <p className="text-slate-400">Try adjusting your search terms or check back later.</p>
               </div>
             )}
           </section>
@@ -337,7 +446,7 @@ const AgentRegistryApp: React.FC = () => {
       <footer className="px-6 pb-10">
         <div className="mx-auto max-w-7xl text-xs text-slate-500/80">
           <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent my-6" />
-          <p>© {new Date().getFullYear()} Agent Registry — Dark UI</p>
+          <p>© {new Date().getFullYear()} Agent Registry — Dark UI with AI Optimization</p>
         </div>
       </footer>
     </div>

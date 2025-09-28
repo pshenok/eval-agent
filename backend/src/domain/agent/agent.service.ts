@@ -161,10 +161,9 @@ STAGES:
 ${JSON.stringify(stagesData, null, 2)}
 
 Please analyze these agents and their stages, then create an optimized agent that:
-1. Combines the best aspects of all agents
-2. Eliminates redundancy
-3. Optimizes the stage sequence for better performance
-4. Maintains all essential functionality
+
+Use same stages and sequence as the original agents.
+Find best stages by metrics and combine new agent.
 
 Please respond with a JSON object in this exact format:
 {
@@ -180,7 +179,7 @@ Please respond with a JSON object in this exact format:
       "output": "Output description",
       "vendor": "Vendor name",
       "type": "Stage type",
-      "evaluation": {} // Optional evaluation object
+      "evaluation": { "metrics": {"cost_usd": 0.04254, "total_ms": 4367, "tokens_in": 1071 }}
     }
   ]
 }
